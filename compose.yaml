@@ -1,0 +1,53 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongod", "--version"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=secret
+      - RABBITMQ_DEFAULT_PASS=secret
+    ports:
+      - "62335:5672"
+      - "15672:15672"
+    command: >
+      sh -c "rabbitmq-plugins enable rabbitmq_management &&
+             rabbitmq-server"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order_creation_app:
+    image: btg-pactual-order-creation
+    container_name: order-creation_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: mongodb://admin:123@mongodb:27017/btgpactualdb
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: secret
+      SPRING_RABBITMQ_PASSWORD: secret
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
