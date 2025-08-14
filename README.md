@@ -2,6 +2,8 @@
 
 ## Sobre o Projeto
 
+Projeto desenvolvido apenas para fins didáticos.
+
 Trata-se da resolução de um desafio técnico, onde foi criado um microserviço, desenvolvido com Java e **Spring Boot** 
  e que se integra a um sistema de mensageria (**RabbitMQ**) e a um banco de dados NoSQL (**MongoDB**).
 Ele realiza as seguintes operações principais:
